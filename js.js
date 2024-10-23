@@ -1,24 +1,16 @@
 var list = [
-    {
-        id: 1,
-        task: "Fuck off",
-        completed: false
-    },
-    {
-        id: 2,
-        task: "Fuck you",
-        completed: false
-    },
-    {
-        id: 3,
-        task: "Fuck this",
-        completed: false
-    }
+    
 ]
 
 const listElement = document.querySelector('.list');
 const inputElement = document.querySelector('#task-input');
 const addBtn = document.querySelector('#add-btn');
+const containerElement = document.querySelector('.container');
+
+const modal = document.querySelector('dialog')
+const modalConfirmButton = document.querySelector('#confirm-btn');
+const modalCancelButton = document.querySelector('#cancel-btn');
+const modalEditInput = document.querySelector('#edit-task-input');
 
 addBtn.addEventListener('click', () => {
     addTask();
@@ -27,7 +19,6 @@ addBtn.addEventListener('click', () => {
 inputElement.addEventListener('click', () => {
     inputElement.placeholder = 'Add a task...'
     inputElement.classList.remove('invalid')
-
 })
 
 function addTask() {
@@ -45,11 +36,16 @@ function addTask() {
     
         list.push(objToAdd)
         
-        input = '';
+        //reset input fields
         inputElement.value = '';
 
+        //rerender list
         renderList();
+        
+        //recalculate new height for animation
 
+        var currentHeight = containerElement.getBoundingClientRect().height;
+        containerElement.style.height = currentHeight + 50 + 8 + "px";
     } else {
         inputElement.classList.add('invalid')
         inputElement.placeholder = 'Your task have a name...'
@@ -64,6 +60,10 @@ function deleteTask(id) {
 
     //rerender list
     renderList();
+
+    //recalculate new height for animation
+    var currentHeight = containerElement.getBoundingClientRect().height;
+    containerElement.style.height = currentHeight - 58 + "px";
 }
 
 function editTask(id) {
@@ -75,11 +75,26 @@ function editTask(id) {
 
     //if found, prompt for new text
     if (taskToEdit) {
-        var newTaskText = prompt("edit your pointless task:", taskToEdit.task)
-        taskToEdit.task = newTaskText;
 
-        //rerender list
-        renderList();
+        //open modal
+        modal.showModal();
+        
+        //put current text value in edit input field
+        modalEditInput.value = taskToEdit.task
+
+        //add a listener for the cancel button, just closes modal
+        modalCancelButton.addEventListener('click', () => {
+            modal.close();
+        })
+        
+        //add a listener for the confirm button
+        modalConfirmButton.addEventListener('click', () => {
+            taskToEdit.task = modalEditInput.value
+            modal.close();
+            
+            //rerender list
+            renderList();
+        })
     }
 }
 
@@ -107,7 +122,8 @@ function renderList() {
         const li = document.createElement('li');
         li.dataset.taskid = task.id;
 
-        if(task.completed) {
+        //check if task completed and assign class accordingly
+        if (task.completed) {
             li.classList.add('completed')
         }
         
@@ -157,5 +173,6 @@ function renderList() {
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('dom rendered')
+
     renderList();
 });
